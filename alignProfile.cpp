@@ -23,12 +23,29 @@ AC-C
 
 #include "Sequence.h"
 #include "Matrix.h"
+
 #include <iostream>
+#include <vector>
 
 using namespace std;
-/*
-int main(int argc, char *argv[])
+
+int main2(int argc, char *argv[])
 {
+	if(argc < 3) {
+		cout << "usage: alignProfile seq1.txt seq2.txt" << endl;
+		return 1;
+	}
+	//Read in sequences
+	vector<Sequence> profile1, profile2;
+	Sequence::ReadProfile(profile1, argv[1]);
+	Sequence::ReadProfile(profile2, argv[2]);
+	//Perform ClustalW
+	Matrix m;
+	cout << m.MultipleAlignment(profile1, profile2);
+	//Output the result
+#ifdef _DEBUG
+	cout << "press enter to close" << endl;
+	int nothing = getchar();
+#endif
 	return 0;
 }
-*/

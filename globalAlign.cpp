@@ -31,7 +31,7 @@ AA--
 
 using namespace std;
 
-int main(int argc, char *argv[])
+int main1(int argc, char *argv[])
 {
 	if(argc < 3) {
 		cout << "usage: ./globalAlign seq1.txt seq2.txt" << endl;
@@ -41,15 +41,15 @@ int main(int argc, char *argv[])
 	Sequence seq2(argv[2]);
 
 #ifdef _DEBUG
-	cout << "Original Alignments: " << endl;
+	cout << "Original Sequence: " << endl;
 	cout << "\t" << seq1.sequence_data << endl;
 	cout << "\t" << seq2.sequence_data << endl;
 #endif
 
-	Matrix matrix(seq1, seq2);
-	Matrix matrix2(seq2, seq1);
-	cout << matrix.globalAlign() << endl;
-	cout << matrix2.globalAlign() << endl;
+	Matrix matrix;
+	
+	cout << matrix.GlobalAlign(seq1,seq2).sequence_data << endl;
+	cout << matrix.GlobalAlign(seq2,seq1).sequence_data << endl;
 
 #ifdef _DEBUG
 	cout << "press enter to close" << endl;

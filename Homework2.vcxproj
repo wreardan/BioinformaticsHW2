@@ -78,12 +78,16 @@
   <ItemGroup>
     <ClCompile Include="alignProfile.cpp" />
     <ClCompile Include="globalAlign.cpp" />
+    <ClCompile Include="makeTree.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Sequence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Sequence.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

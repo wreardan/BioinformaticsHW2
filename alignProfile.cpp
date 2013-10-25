@@ -41,7 +41,9 @@ int main2(int argc, char *argv[])
 	Sequence::ReadProfile(profile2, argv[2]);
 	//Perform ClustalW
 	Matrix m;
-	cout << m.MultipleAlignment(profile1, profile2);
+	vector<Sequence> sequences = m.MultipleAlignment(profile1, profile2);
+	for(unsigned int i = 0; i < sequences.size(); i++)
+		cout << sequences[i].sequence_data << endl;
 	//Output the result
 #ifdef _DEBUG
 	cout << "press enter to close" << endl;

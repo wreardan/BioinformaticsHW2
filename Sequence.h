@@ -7,8 +7,9 @@ class Sequence
 protected:
 public:
 	std::string sequence_data;
-	int score;
+	float score;
 	std::vector<std::string> names;
+	std::vector<Sequence> profile;
 	bool used;
 
 	Sequence(void);

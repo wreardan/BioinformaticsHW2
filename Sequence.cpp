@@ -8,7 +8,7 @@ using namespace std;
 Sequence::Sequence(void)
 {
 	sequence_data = "";
-	score = 0;
+	score = 0.0f;
 	used = false;
 }
 

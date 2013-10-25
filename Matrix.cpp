@@ -6,9 +6,9 @@
 
 using namespace std;
 
-static int gap_penalty = 0;
-static int matches = 2;
-static int mismatches = 1;
+static float gap_penalty = 0;
+static float matches = 2;
+static float mismatches = 1;
 
 //Create a Blank Matrix Node
 MatrixNode::MatrixNode()
@@ -107,7 +107,7 @@ Sequence Matrix::GlobalAlign(Sequence & seq1, Sequence & seq2)
 			node.left = data[y][x-1].score - gap_penalty;
 			node.up = data[y-1][x].score - gap_penalty;
 
-			unsigned int cur_score = (seq1.sequence_data[x-1] == seq2.sequence_data[y-1]) ? matches : mismatches;
+			float cur_score = (seq1.sequence_data[x-1] == seq2.sequence_data[y-1]) ? matches : mismatches;
 			node.upleft = data[y-1][x-1].score + cur_score;
 
 			if(node.upleft >= node.left && node.upleft >= node.up)
@@ -156,13 +156,21 @@ Sequence Matrix::GlobalAlign(Sequence & seq1, Sequence & seq2)
 	return result;
 }
 
-string Matrix::MultipleAlignment(std::vector<Sequence> profile1, std::vector<Sequence> profile2)
+vector<Sequence> Matrix::MultipleAlignment(std::vector<Sequence> profile1, std::vector<Sequence> profile2)
 {
 	int x, y;
-	stringstream resultString;
-	string result1, result2, result3, result4;
+	vector<Sequence> results;
+	vector<string> result1, result2, buf1, buf2;
+	vector<int> scores;
+	unsigned int i, j;
 
 	SetupMatrix(profile1[0].sequence_data.size(), profile2[0].sequence_data.size());
+
+	//Resize result/temp vectors
+	result1.resize(profile1.size());
+	result2.resize(profile2.size());
+	buf1.resize(profile1.size());
+	buf2.resize(profile2.size());
 
 	//Top left box is 0,0,0,0
 	data[0][0] = MatrixNode();
@@ -186,24 +194,18 @@ string Matrix::MultipleAlignment(std::vector<Sequence> profile1, std::vector<Seq
 			node.left = data[y][x-1].score - gap_penalty;
 			node.up = data[y-1][x].score - gap_penalty;
 
-			int score1=0, score2=0, score3=0, score4=0;
-			char a = profile1[0].sequence_data[x-1];
-			char b = profile1[1].sequence_data[x-1];
-			char c = profile2[0].sequence_data[y-1];
-			char d = profile2[1].sequence_data[y-1];
-			if(a != '-') {
-				if(c != '-')
-					score1 = (a == c) ? matches : mismatches;
-				if(d != '-')
-					score2 = (a == d) ? matches : mismatches;
+			float cur_score = 0;
+			for(i = 0; i < profile1.size(); i++) {
+				for(j = 0; j < profile2.size(); j++) {
+					char a = profile1[i].sequence_data[x-1];
+					char b = profile2[j].sequence_data[y-1];
+					if(a == '-' || b == '-')
+						continue;
+					cur_score += (a == b) ? matches : mismatches;
+				}
 			}
-			if(b != '-') {
-				if(c != '-')
-					score3 = (b == c) ? matches : mismatches;
-				if(d != '-')
-					score4 = (b == d) ? matches : mismatches;
-			}
-			int cur_score = (score1 + score2 + score3 + score4);
+			cur_score = cur_score / (profile1.size() * profile2.size());
+
 			node.upleft = data[y-1][x-1].score + cur_score;
 
 			if(node.upleft >= node.left && node.upleft >= node.up)
@@ -220,50 +222,61 @@ string Matrix::MultipleAlignment(std::vector<Sequence> profile1, std::vector<Seq
 	y = height - 1;
 	while(x > 0 || y > 0) {
 		MatrixNode & node = data[y][x];
-		char buf1[4] = {'-', 0, 0, 0 };
-		char buf2[4] = {'-', 0, 0, 0 };
-		char buf3[4] = {'-', 0, 0, 0 };
-		char buf4[4] = {'-', 0, 0, 0 };
-		if(x > 0) {
-			buf1[0] = profile1[0].sequence_data[x-1];
-			buf2[0] = profile1[1].sequence_data[x-1];
-		}
-		if(y > 0) {
-			buf3[0] = profile2[0].sequence_data[y-1];
-			buf4[0] = profile2[1].sequence_data[y-1];
-		}
-		if(node.upleft > node.left && node.upleft > node.up) {
-			result1.append(buf1);
-			result2.append(buf2);
-			result3.append(buf3);
-			result4.append(buf4);
+
+		for(i = 0; i < profile1.size(); i++)
+			if(x > 0)
+				buf1[i] =  profile1[i].sequence_data[x-1];
+			else
+				buf1[i] = "-";
+
+		for(i = 0; i < profile2.size(); i++)
+			if(y > 0)
+				buf2[i] =  profile2[i].sequence_data[y-1];
+			else
+				buf2[i] = "-";
+
+		if(node.upleft >= node.left && node.upleft >= node.up) {
+			for(i = 0; i < profile1.size(); i++)
+				result1[i].append(buf1[i]);
+			for(i = 0; i < profile2.size(); i++)
+				result2[i].append(buf2[i]);
 			x--; y--;
 		}
-		else if(node.left > node.up && node.left > node.upleft)
-		{	
-			result1.append(buf1);
-			result2.append(buf2);
-			result3.append("-");
-			result4.append("-");
+		else if(node.left > node.up && node.left > node.upleft) {
+			for(i = 0; i < profile1.size(); i++)
+				result1[i].append(buf1[i]);
+			for(i = 0; i < profile2.size(); i++)
+				result2[i].append("-");
 			x--;
 		}
 		else //if(node.up > node.left && node.up > node.upleft)
 		{
-			result1.append("-");
-			result2.append("-");
-			result3.append(buf3);
-			result4.append(buf4);
+			for(i = 0; i < profile1.size(); i++)
+				result1[i].append("-");
+			for(i = 0; i < profile2.size(); i++)
+				result2[i].append(buf2[i]);
 			y--;
 		}
 	}
-	//reverse resulting strings because they're backwards
-	reverse(result1.begin(), result1.end());
-	reverse(result2.begin(), result2.end());
-	reverse(result3.begin(), result3.end());
-	reverse(result4.begin(), result4.end());
 
-	resultString << result1 << endl << result2 << endl << result3 << endl << result4 << endl;
-	return resultString.str();
+	//Reverse Strings
+	for(i = 0; i < profile1.size(); i++)
+		reverse(result1[i].begin(), result1[i].end());
+	for(i = 0; i < profile2.size(); i++)
+		reverse(result2[i].begin(), result2[i].end());
+
+	Sequence s;
+	//Append Strings
+	for(i = 0; i < profile1.size(); i++) {
+		s.sequence_data = result1[i];
+		results.push_back(s);
+	}
+	for(i = 0; i < profile2.size(); i++) {
+		s.sequence_data = result2[i];
+		results.push_back(s);
+	}
+
+	return results;
 }
 
 /* HW2-Problem2
@@ -328,6 +341,74 @@ void combine_names(vector<string> & names1, vector<string> & names2) {
 }
 
 
+std::vector<Sequence> Matrix::UPGMA_Sequence(std::vector<Sequence> & sequence_set)
+{
+	std::vector<Sequence> alignment;
+	Matrix m;
+	Sequence seq;
+
+	DistanceMatrix(sequence_set);
+
+	for(int i = 0; i < max(width, height); i++) {
+		//Find minimum distance
+		int min_y = 0, min_x = 1;
+		float min_distance = 1000000;
+		bool all_used = true;
+		for(int y = 0; y < height; y++) {
+			for(int x = y+1; x < width; x++) {
+				if(sequence_set[y].used || sequence_set[x].used)
+					continue;
+				if(data[y][x].distance < min_distance) {
+					min_distance = data[y][x].distance;
+					min_y = y;
+					min_x = x;
+					all_used = false;
+				}
+			}
+		}
+		if(all_used)
+			break;
+
+		SetupMatrix(height, width);
+		for(int y = 0; y < height-1; y++) {
+			int x = width - 1;
+			MatrixNode & node = data[y][x];
+			if(x == min_x || y == min_y)
+				node.distance = 10000;
+			else
+				node.distance = (data[y][min_x].distance + data[y][min_y].distance) / 2.0f;
+			node.child1 = min_x;
+			node.child2 = min_y;
+		}
+
+		sequence_set[min_y].used = true;
+		sequence_set[min_x].used = true;
+		
+		//combine_names(sequence_set[sequence_set.size()-1].names, sequence_set[min_x].names);
+		//combine_names(sequence_set[sequence_set.size()-1].names, sequence_set[min_y].names);
+		if(sequence_set[min_x].profile.size() == 0) {
+			Sequence s;
+			s.sequence_data = sequence_set[min_x].sequence_data;
+			sequence_set[min_x].profile.push_back(s);
+		}
+		if(sequence_set[min_y].profile.size() == 0) {
+			Sequence s;
+			s.sequence_data = sequence_set[min_y].sequence_data;
+			sequence_set[min_y].profile.push_back(s);
+		}
+
+		seq = Sequence();
+		//seq.profile.insert(seq.profile.begin(), sequence_set[min_x].profile.begin(), sequence_set[min_x].profile.end());
+		//seq.profile.insert(seq.profile.begin(), sequence_set[min_y].profile.begin(), sequence_set[min_y].profile.end());
+		seq.profile = m.MultipleAlignment(sequence_set[min_y].profile, sequence_set[min_x].profile);
+		
+		sequence_set.push_back(seq);
+	}
+
+
+
+	return seq.profile;
+}
 
 string Matrix::UPGMA(std::vector<Sequence> & sequence_set)
 {

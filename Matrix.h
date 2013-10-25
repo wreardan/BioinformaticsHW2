@@ -6,9 +6,8 @@
 class MatrixNode
 {
 public:
-	int left, upleft, up, score;
+	float left, upleft, up, score, distance;
 	int child1, child2;
-	float distance;
 
 	MatrixNode();
 	MatrixNode(unsigned int x, unsigned int y);
@@ -32,8 +31,9 @@ public:
 //Methods
 	Sequence GlobalAlign(Sequence & seq1, Sequence & seq2);
 	std::string ClustalW(std::vector<Sequence> profile1, std::vector<Sequence> profile2);
-	std::string MultipleAlignment(std::vector<Sequence> profile1, std::vector<Sequence> profile2);
+	std::vector<Sequence> MultipleAlignment(std::vector<Sequence> profile1, std::vector<Sequence> profile2);
 	std::string UPGMA(std::vector<Sequence> & sequence_set);
+	std::vector<Sequence> UPGMA_Sequence(std::vector<Sequence> & sequence_set);
 	void DistanceMatrix(std::vector<Sequence> & sequence_set);
 };
 

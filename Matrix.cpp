@@ -405,8 +405,6 @@ std::vector<Sequence> Matrix::UPGMA_Sequence(std::vector<Sequence> & sequence_se
 		sequence_set.push_back(seq);
 	}
 
-
-
 	return seq.profile;
 }
 
